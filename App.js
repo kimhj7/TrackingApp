@@ -12,11 +12,20 @@ const LocationTracker = () => {
   useEffect(() => {
 
     (async () => {
-      let {status} = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+      const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+
+// Request background location permission
+      if (foregroundStatus === 'granted') {
+        const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+        if (backgroundStatus !== 'granted') {
+          alert('Permission to access location was denied');
+          return;
+        }
+      } else {
+        alert('Permission to access location was denied');
         return;
       }
+
       const intervalId = setInterval(() => {
         sendLocationData();
       }, GPS_UPDATE_INTERVAL);
